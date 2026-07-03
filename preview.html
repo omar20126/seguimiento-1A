@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento Académico 1°A</title>
+
+<style>
+body{
+    font-family:Arial, sans-serif;
+    background:#f2f5f9;
+    margin:0;
+    padding:20px;
+}
+
+h1,h2{
+    text-align:center;
+    color:#0d47a1;
+}
+
+.contenedor{
+    max-width:1500px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+}
+
+.botones{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+button{
+    padding:10px 18px;
+    margin:5px;
+    border:none;
+    border-radius:8px;
+    background:#0d47a1;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1565c0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d47a1;
+    color:white;
+    padding:10px;
+}
+
+td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
+}
+
+input{
+    width:60px;
+    text-align:center;
+}
+
+.nombre{
+    text-align:left;
+    min-width:300px;
+}
+
+.total{
+    font-weight:bold;
+}
+
+.aprobado{
+    background:#dcedc8;
+}
+
+.reprobado{
+    background:#ffcdd2;
+}
+
+#vistaPadres{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+<h1>📚 Seguimiento Académico 1°A</h1>
+
+<div class="botones">
+<button onclick="modoDocente()">👨‍🏫 Docente</button>
+<button onclick="modoPadres()">👨‍👩‍👧‍👦 Padres de Familia</button>
+</div>
+
+<div id="vistaDocente">
+
+<h2>Registro del Docente</h2>
+
+<div class="botones">
+<button onclick="guardar()">💾 Guardar</button>
+<button onclick="descargarCSV()">📥 Descargar Reporte</button>
+</div>
+
+<div style="overflow:auto">
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>Alumno</th>
+<th>Participaciones</th>
+<th>Tareas</th>
+<th>Trabajos</th>
+<th>Lecturas</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="tablaDocente"></tbody>
+</table>
+</div>
+
+</div>
+
+<div id="vistaPadres">
+
+<h2>Consulta para Padres de Familia</h2>
+
+<div style="overflow:auto">
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>Alumno</th>
+<th>Participaciones</th>
+<th>Tareas</th>
+<th>Trabajos</th>
+<th>Lecturas</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="tablaPadres"></tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let alumnos =
+JSON.parse(localStorage.getItem("grupo1A")) || [
+
+{nombre:"ANDRACA GARCIA IKER",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"BEMARAS CABRERA LUZ ELENA",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"BENITEZ CIPRIANO LUCERO NATIVIDAD",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"BLANCO OCAMPO KENNI SAID",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"CASTAÑON GODINEZ ALICE MARIEL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"CATALAN VAZQUEZ PABLO",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"CRUZ HERNANDEZ EMMANUEL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"CRUZ MORENO LUIS YAHEL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"DELGADO GARCIA BRENDA TATIANA",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GARZON SALINAS ANGEL YACZEL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GODINEZ FLORES DANA NICOL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GOMEZ GARCIA ORIANA CRISTAL",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GUATEMALA CORTEZ EMILIANO",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GUATEMALA LUCAS KEVIN ALONSO",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"GUTIERREZ GARCIA RICARDO",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"HERNANDEZ LORETO SEBASTIAN",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"JUSTO BELTRAN YOANA GUADALUPE",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"LAZARO SANTIAGO JOSE MARIA",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"NIÑO SANCHEZ ELIZABETH",participaciones:0,tareas:0,trabajos:0,lecturas:0},
+{nombre:"PALMA REDUCINDO YENNIFER",participaciones:0,tareas:0,trabajos:0,lecturas:0}
+
+];
+
+mostrar();
+
+function mostrar(){
+
+let docente="";
+let padres="";
+
+alumnos.forEach((a,i)=>{
+
+let total =
+a.participaciones +
+a.tareas +
+a.trabajos +
+a.lecturas;
+
+let clase = total >=20 ? "aprobado":"reprobado";
+
+docente += `
+<tr class="${clase}">
+<td>${i+1}</td>
+<td class="nombre">${a.nombre}</td>
+
+<td><input type="number"
+value="${a.participaciones}"
+onchange="actualizar(${i},'participaciones',this.value)">
+</td>
+
+<td><input type="number"
+value="${a.tareas}"
+onchange="actualizar(${i},'tareas',this.value)">
+</td>
+
+<td><input type="number"
+value="${a.trabajos}"
+onchange="actualizar(${i},'trabajos',this.value)">
+</td>
+
+<td><input type="number"
+value="${a.lecturas}"
+onchange="actualizar(${i},'lecturas',this.value)">
+</td>
+
+<td class="total">${total}</td>
+</tr>
+`;
+
+padres += `
+<tr class="${clase}">
+<td>${i+1}</td>
+<td class="nombre">${a.nombre}</td>
+<td>${a.participaciones}</td>
+<td>${a.tareas}</td>
+<td>${a.trabajos}</td>
+<td>${a.lecturas}</td>
+<td class="total">${total}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("tablaDocente").innerHTML = docente;
+document.getElementById("tablaPadres").innerHTML = padres;
+}
+
+function actualizar(i,campo,valor){
+alumnos[i][campo]=Number(valor);
+mostrar();
+}
+
+function guardar(){
+localStorage.setItem(
+"grupo1A",
+JSON.stringify(alumnos)
+);
+alert("Información guardada.");
+}
+
+function modoDocente(){
+document.getElementById("vistaDocente").style.display="block";
+document.getElementById("vistaPadres").style.display="none";
+}
+
+function modoPadres(){
+document.getElementById("vistaDocente").style.display="none";
+document.getElementById("vistaPadres").style.display="block";
+}
+
+function descargarCSV(){
+
+let csv =
+"No,Alumno,Participaciones,Tareas,Trabajos,Lecturas,Total\n";
+
+alumnos.forEach((a,i)=>{
+let total =
+a.participaciones +
+a.tareas +
+a.trabajos +
+a.lecturas;
+
+csv +=
+`${i+1},"${a.nombre}",${a.participaciones},${a.tareas},${a.trabajos},${a.lecturas},${total}\n`;
+});
+
+let blob = new Blob([csv],{type:"text/csv"});
+let enlace = document.createElement("a");
+enlace.href = URL.createObjectURL(blob);
+enlace.download = "Grupo_1A.csv";
+enlace.click();
+}
+
+</script>
+
+</body>
+</html>
